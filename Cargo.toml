@@ -6,7 +6,11 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "lib"
+path = "lib/lib.rs"
+
 [dependencies.cat_engine]
 git = "https://github.com/Clomance/CatEngine"
 branch = "pre-release"
-features = ["audio"]
+features = ["audio","colour_filter"]

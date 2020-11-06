@@ -15,6 +15,9 @@ pub use object_map::{
 pub mod colours;
 
 mod user_interface;
+mod image_object;
+pub use image_object::ImageObject;
+
 pub use user_interface::*;
 
 // Выравнивание

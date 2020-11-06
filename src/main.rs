@@ -51,6 +51,8 @@ use cat_engine::{
     MouseScrollDelta,
 
     PagedWindow,
+    WindowPage,
+    Window,
 
     // statics
     mouse_cursor,
@@ -64,6 +66,8 @@ const game_name:&'static str="GhostBuster";
 
 const audio_menu_path:&'static str="resources/audio/main_theme.mp3";
 const audio_menu_name:&'static str="main_theme";
+
+pub static loading:bool=true;
 
 fn main(){
     // Настройки игры
@@ -94,7 +98,7 @@ fn main(){
         s.vsync=true;
     }).unwrap();
 
-    let mut game=Game::new(settings);
+    //let mut game=Game::new(game_settings,loading_function);
 }
 
 
@@ -102,6 +106,8 @@ struct Game{
     game_start_time:Instant,
     settings:GameSettings,
     audio:AudioWrapper,
+
+    wallpaper:Wallpaper,
 
     frames:u64,
 
@@ -166,13 +172,12 @@ impl Game{
         let thread=std::thread::spawn(background);
 
         Self{
+            game_start_time:Instant::now(),
             audio:audio,
             settings:settings,
             wallpaper:Wallpaper::Colour(White),
-            images:Vec::new(),
 
             frames:0u64,
-            thread:Some(thread),
 
             saved_drawables,
             object_map,
@@ -186,9 +191,9 @@ impl Game{
 
     pub fn loading_updates(&mut self,window:&mut PagedWindow){
         if unsafe{!loading}{
-            if let Some(thread)=self.thread.take(){
-                self.images=thread.join().expect("Ошибка начальной загрузки");
-            }
+            // if let Some(thread)=self.thread.take(){
+            //     self.images=thread.join().expect("Ошибка начальной загрузки");
+            // }
 
             self.saved_drawables.clear();
             // Отчистка слоёв
@@ -199,7 +204,7 @@ impl Game{
             }
             self.audio.play_track("main_theme");
 
-            return set_main_menu(self,window)
+            //return set_main_menu(self,window)
         }
 
         if let DrawType::Rotating((angle,_))=&mut self.object_map.get_drawable(0,1).draw_type{
@@ -264,18 +269,18 @@ impl WindowPage<'static> for Game{
             }
             else{
                 // Заполнение картинкой
-                let shift=[
-                    dx/wallpaper_movement_scale,
-                    dy/wallpaper_movement_scale,
-                ];
-                graphics.draw_shift_textured_object(wallpaper,shift,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
+                // let shift=[
+                //     dx/wallpaper_movement_scale,
+                //     dy/wallpaper_movement_scale,
+                // ];
+                // graphics.draw_shift_textured_object(wallpaper,shift,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
             }
 
             // Рендеринг объектов
             self.object_map.draw(parameters,graphics);
 
             // Рендеринг курсора
-            graphics.draw_shift_textured_object(mouse_cursor_icon,[dx,dy],ColourFilter::new_mul([1f32;4]),parameters).unwrap();
+            //graphics.draw_shift_textured_object(mouse_cursor_icon,[dx,dy],ColourFilter::new_mul([1f32;4]),parameters).unwrap();
         }).unwrap();
     }
 

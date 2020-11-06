@@ -1,1 +1,2 @@
-use main_menu;
+mod main_menu;
+use main_menu::*;

@@ -60,8 +60,8 @@ impl LoadingScreen{
 
         graphics.add_texture(ghost_texture);
 
-        graphics.add_textured_object(&image_base,ghost_1).unwrap();
-        graphics.add_textured_object(&image_base,ghost_2).unwrap();
+        graphics.add_textured_object(&image_base,1).unwrap();
+        graphics.add_textured_object(&image_base,1).unwrap();
 
         // Создание потока загрузки ресурсов
         let thread=spawn(move|| {
@@ -160,7 +160,7 @@ impl WindowPage<'static> for LoadingScreen{
     }
 
     fn on_modifiers_changed(&mut self, window: &mut Self::Window, modifiers: ModifiersState) {
-        unimplemented!()
+
     }
 
     #[cfg(feature="file_drop")]

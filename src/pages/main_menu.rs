@@ -1,9 +1,4 @@
-use crate::{
-    game_name,
-    // structs
-    Drawable,
-    DrawableObject,
-};
+use crate::{game_name, Drawable, DrawableObject, main_menu_wallpaper_path, wallpaper_index};
 
 
 use lib::{
@@ -19,28 +14,16 @@ use lib::{
     ObjectMap
 };
 
-use cat_engine::{
-    window_height,
-    window_width,
-    mouse_cursor,
-    WindowEvent,
-    KeyboardButton,
-    MouseButton,
-    glium::DrawParameters,
-    Window,
-    audio::Audio, shapes::*, DefaultWindow, PagedWindow,
-    graphics::{
-        Graphics,
-        DrawType,
-        ObjectType
-    },
-    WindowPage,
-    MouseScrollDelta,
-    ModifiersState
-};
+use cat_engine::{window_height, window_width, mouse_cursor, WindowEvent, KeyboardButton, MouseButton, glium::DrawParameters, Window, audio::Audio, shapes::*, DefaultWindow, PagedWindow, graphics::{
+    Graphics,
+    DrawType,
+    ObjectType
+}, WindowPage, MouseScrollDelta, ModifiersState, window_center};
 
 use lib::colours::Bleak_orange;
 use std::path::PathBuf;
+use std::iter::Filter;
+use cat_engine::graphics::ColourFilter;
 
 // Индекс картинки для главного меню
 // Пока что так
@@ -54,10 +37,7 @@ pub struct MainMenu<'a>{
 impl<'a> MainMenu<'a>{
     pub fn new(object_map:&'a mut ObjectMap,window:&mut PagedWindow)->MainMenu<'a>{
         // Устновка обоев для главного меню
-        // window.graphics2d().get_textured_object_texture(wallpaper).update(/);
-
-        object_map.add_new_layer();
-        object_map.set_layer_enabled(0,false);
+        //window.graphics2d().get_textured_object_texture(main_menu_wallpaper).update(/);
 
         let main_menu = MenuButtons::new(window);
         object_map.add_complex_object(0,main_menu);
@@ -80,6 +60,7 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
 
     fn on_redraw_requested(&mut self, window: &mut Self::Window) {
         window.draw(|parameters, graphics|{
+            graphics.draw_textured_object(wallpaper_index,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
             self.object_map.draw(parameters, graphics);
         });
     }
@@ -207,11 +188,11 @@ impl MenuButtons{
 
         // Menu buttons
         let confirmation_button_size = [400f32, 100f32];
-        let button_game_placement = [1920f32/920f32-200f32, 1080f32/2f32, confirmation_button_size[0], confirmation_button_size[1]];
-        let button_game_settings = ButtonSettings::new("НАЧАТь ИГРУ", button_game_placement);
+        let button_game_placement = unsafe{[window_center[0]-200f32, window_center[1], confirmation_button_size[0], confirmation_button_size[1]]};
+        let button_game_settings = ButtonSettings::new("НАЧАТЬ ИГРУ", button_game_placement).background_colour([0f32;4]);
         let button_game = Button::new(button_game_settings, window.graphics2d());
-        let button_quit_placement = [1920f32/920f32-200f32, 1080f32/2f32 + 120f32, confirmation_button_size[0], confirmation_button_size[1]];
-        let button_quit_settings = ButtonSettings::new("ВЫЙТИ", button_quit_placement);
+        let button_quit_placement = unsafe{[window_center[0]-200f32, window_center[1] + 120f32, confirmation_button_size[0], confirmation_button_size[1]]};
+        let button_quit_settings = ButtonSettings::new("ВЫЙТИ", button_quit_placement).background_colour([0f32;4]);;
         let button_quit = Button::new(button_quit_settings, window.graphics2d());
 
         Self{

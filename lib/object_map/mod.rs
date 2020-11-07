@@ -30,7 +30,6 @@ use cat_engine::{
         ObjectType,
         DrawType,
         Graphics,
-        ColourFilter,
     }
 };
 
@@ -119,7 +118,7 @@ impl ObjectMap{
         self.click_map.clear()
     }
 
-    pub fn pressed(&mut self,cursor:[f32;2])->Option<(usize)>{
+    pub fn pressed(&mut self,cursor:[f32;2])->Option<usize>{
         if let Some((local_id,object_map_id))=self.click_map.pressed(cursor){
             Some(local_id)
         }

@@ -14,17 +14,11 @@ use lib::{
     ObjectMap
 };
 
-use cat_engine::{window_height, window_width, mouse_cursor, WindowEvent, KeyboardButton, MouseButton, glium::DrawParameters, Window, audio::Audio, shapes::*, DefaultWindow, PagedWindow, graphics::{
-    Graphics,
-    DrawType,
-    ObjectType
-}, WindowPage, MouseScrollDelta, ModifiersState, window_center};
+use cat_engine::{mouse_cursor, KeyboardButton, MouseButton, Window, audio::Audio, PagedWindow, WindowPage, MouseScrollDelta, ModifiersState, window_center};
 
-use std::path::PathBuf;
-use std::iter::Filter;
 use cat_engine::graphics::ColourFilter;
 use cat_engine::image::RgbaImage;
-use lib::colours::{White, Black};
+use lib::colours::{White};
 
 // Индекс картинки для главного меню
 // Пока что так
@@ -120,41 +114,41 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
         }
     }
 
-    fn on_mouse_scrolled(&mut self, window: &mut Self::Window, Scroll: MouseScrollDelta) {
+    fn on_mouse_scrolled(&mut self, _window: &mut Self::Window, _Scroll: MouseScrollDelta) {
     }
 
-    fn on_mouse_moved(&mut self, window: &mut Self::Window, position: [f32; 2]) {
-
-    }
-
-    fn on_keyboard_pressed(&mut self, window: &mut Self::Window, button: KeyboardButton) {
-    }
-
-    fn on_keyboard_released(&mut self, window: &mut Self::Window, button: KeyboardButton) {
-    }
-
-    fn on_character_recieved(&mut self, window: &mut Self::Window, character: char) {
-    }
-
-    fn on_window_resized(&mut self, window: &mut Self::Window, new_size: [u32; 2]) {
-    }
-
-    fn on_window_moved(&mut self, window: &mut Self::Window, position: [i32; 2]) {
-    }
-
-    fn on_window_focused(&mut self, window: &mut Self::Window, focused: bool) {
+    fn on_mouse_moved(&mut self, _window: &mut Self::Window, _position: [f32; 2]) {
 
     }
 
-    fn on_suspended(&mut self, window: &mut Self::Window) {
+    fn on_keyboard_pressed(&mut self, _window: &mut Self::Window, _button: KeyboardButton) {
+    }
+
+    fn on_keyboard_released(&mut self, _window: &mut Self::Window, _button: KeyboardButton) {
+    }
+
+    fn on_character_recieved(&mut self, _window: &mut Self::Window, _character: char) {
+    }
+
+    fn on_window_resized(&mut self, _window: &mut Self::Window, _new_size: [u32; 2]) {
+    }
+
+    fn on_window_moved(&mut self, _window: &mut Self::Window, _position: [i32; 2]) {
+    }
+
+    fn on_window_focused(&mut self, _window: &mut Self::Window, _focused: bool) {
 
     }
 
-    fn on_resumed(&mut self, window: &mut Self::Window) {
+    fn on_suspended(&mut self, _window: &mut Self::Window) {
 
     }
 
-    fn on_modifiers_changed(&mut self, window: &mut Self::Window, modifiers: ModifiersState) {
+    fn on_resumed(&mut self, _window: &mut Self::Window) {
+
+    }
+
+    fn on_modifiers_changed(&mut self, _window: &mut Self::Window, _modifiers: ModifiersState) {
     }
 
     #[cfg(feature="file_drop")]

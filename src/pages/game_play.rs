@@ -1,7 +1,4 @@
-use crate::character::Character;
-use crate::map::Map;
 use cat_engine::{WindowPage, MouseScrollDelta, KeyboardButton, ModifiersState, MouseButton, PagedWindow, Window, window_center, window_height, window_rect};
-use std::path::PathBuf;
 use cat_engine::image::RgbaImage;
 use cat_engine::texture::{Texture, ImageBase};
 use crate::{map_background_index, character_image_index};

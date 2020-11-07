@@ -1,8 +1,3 @@
-use std::{
-    io::{Read,Write},
-    fs::OpenOptions,
-};
-
 pub struct GameSettings{
     pub volume:f32, // Громкость игры, 0 - 128
     pub screenshot:u32, // номер следующего скришота

@@ -51,10 +51,6 @@ use cat_engine::{
     window_width
 };
 
-use std::{
-    path::PathBuf,
-    time::Instant
-};
 use cat_engine::glium::backend::glutin::glutin::window::Fullscreen;
 use cat_engine::glium::glutin::window::Icon;
 use cat_engine::image::GenericImageView;

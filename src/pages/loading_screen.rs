@@ -1,4 +1,4 @@
-use crate::{audio_menu_name, audio_menu_path, loading_screen_ghost_texture, wallpaper_index, load_image, load_image_scaled, main_menu_wallpaper_path, character_texture_path, load_image_scaled_height, map_background_path};
+use crate::{loading_screen_ghost_texture, wallpaper_index, load_image, load_image_scaled, main_menu_wallpaper_path, character_texture_path, load_image_scaled_height, map_background_path};
 
 use cat_engine::{PagedWindow, Window, WindowPage, MouseScrollDelta, KeyboardButton, MouseButton, ModifiersState, graphics::{
     ColourFilter,
@@ -12,7 +12,6 @@ use std::{
         spawn,
         JoinHandle,
     },
-    path::PathBuf,
 };
 use cat_engine::image::RgbaImage;
 

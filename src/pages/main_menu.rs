@@ -19,6 +19,7 @@ use cat_engine::{mouse_cursor, KeyboardButton, MouseButton, Window, audio::Audio
 use cat_engine::graphics::ColourFilter;
 use cat_engine::image::RgbaImage;
 use lib::colours::{White};
+use std::path::PathBuf;
 
 // Индекс картинки для главного меню
 // Пока что так
@@ -57,7 +58,7 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
         window.draw(|parameters, graphics|{
             graphics.draw_textured_object(wallpaper_index,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
             self.object_map.draw(parameters, graphics);
-        });
+        }).unwrap();
     }
 
     fn on_mouse_pressed(&mut self, window: &mut Self::Window, button: MouseButton) {

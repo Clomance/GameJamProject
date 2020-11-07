@@ -4,32 +4,39 @@ use cat_engine::texture::{Texture, ImageBase};
 use crate::{map_background_index, character_image_index};
 use lib::colours::White;
 use cat_engine::graphics::ColourFilter;
+use std::path::PathBuf;
+use cat_engine::shapes::RectangleWithBorder;
 
 pub struct GamePlay{
     //character:Character,
     //map:Map,
-
 }
 
 const map_background_texture_index:usize=1;
 // (текстурного объекта)
-const map_background1_index:usize=0;
+const map_background1_index:usize=1;
+const map_background2_index:usize=2;
 
-const character_texture_index:usize=1;
+const character_texture_index:usize=2;
 // Индекс персонажа (текстурного объекта)
-const character_index:usize=1;
+const character_index:usize=3;
 
 
 
 impl GamePlay {
     pub fn new(textures:&Vec<RgbaImage>,window:&mut PagedWindow)->GamePlay{
         // Текстуры карты
-        let map_background=ImageBase::new(White,window_rect());
+        let map_background1=ImageBase::new(White,window_rect());
+        let map_background2=ImageBase::new(White,window_rect());
+
         let background_texture=Texture::from_image(&textures[map_background_index],window.display()).unwrap();
         window.graphics2d().add_texture(background_texture);
-        window.graphics2d().add_textured_object(&map_background,map_background_texture_index).unwrap();
+
+        window.graphics2d().add_textured_object(&map_background1,map_background_texture_index).unwrap();
+        window.graphics2d().add_textured_object(&map_background2,map_background_texture_index).unwrap();
 
 
+        // Персонаж
         let character_image=&textures[character_image_index];
         let rect={
             let size=character_image.dimensions();
@@ -43,7 +50,6 @@ impl GamePlay {
             ]}
         };
         let character=ImageBase::new(White,rect);
-
         let character_texture=Texture::from_image(character_image,window.display()).unwrap();
         window.graphics2d().add_texture(character_texture);
         window.graphics2d().add_textured_object(&character,character_texture_index).unwrap();
@@ -66,8 +72,10 @@ impl WindowPage<'static> for GamePlay{
 
     fn on_redraw_requested(&mut self, window: &mut Self::Window) {
         window.draw(|parameters, graphics|{
+            graphics.draw_textured_object(map_background1_index,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
+            graphics.draw_textured_object(map_background2_index,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
             graphics.draw_textured_object(character_index,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
-        });
+        }).unwrap();
     }
 
     fn on_mouse_pressed(&mut self, _window: &mut Self::Window, _button: MouseButton) {
@@ -83,6 +91,7 @@ impl WindowPage<'static> for GamePlay{
     }
 
     fn on_keyboard_pressed(&mut self, _window: &mut Self::Window, _button: KeyboardButton) {
+
     }
 
     fn on_keyboard_released(&mut self, _window: &mut Self::Window, _button: KeyboardButton) {
@@ -121,4 +130,14 @@ impl WindowPage<'static> for GamePlay{
 
     fn on_event_loop_closed(&mut self, _window: &mut Self::Window) -> Self::Output {
     }
+}
+
+struct Hud{
+    health_bar_size: RectangleWithBorder,
+    energy_bar_size: RectangleWithBorder,
+    health_bar: RectangleWithBorder,
+    energy_bar: RectangleWithBorder,
+    health_text:Text,
+    energy_text:
+
 }

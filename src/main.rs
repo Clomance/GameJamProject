@@ -57,6 +57,9 @@ use cat_engine::image::GenericImageView;
 
 const game_name:&'static str="GhostBuster";
 
+const character_height:u32=300u32;
+
+
 // Индекс обоев (объекта) в кэше
 const wallpaper_index:usize=0;
 // Индекс картинки обоев в массиве картинок
@@ -65,6 +68,7 @@ const main_menu_image_index:usize=0;
 const map_background_index:usize=1;
 // Индекс картинки персонажа в массиве картинок
 const character_image_index:usize=2;
+
 
 
 //
@@ -105,7 +109,8 @@ fn main(){
     //let game_settings=GameSettings::new();
 
     // Настройки аудио системы
-    let settings=AudioSettings::new();
+    let mut settings=AudioSettings::new();
+    settings.general_volume=0.1f32;
     let host=cpal::default_host();
     let audio=Audio::new(host,|host|{
             host.default_output_device().unwrap()
@@ -142,24 +147,28 @@ fn main(){
         let monitor=monitors.remove(0);
         settings.window_attributes.fullscreen=Some(Fullscreen::Borderless(Some(monitor)));
 
+        settings.window_attributes.title=game_name.to_string();
+
         settings.general.initial_colour=Some([1f32;4]);
+
+
 
         settings.vsync=true;
     }).unwrap();
 
     // Установка шрифта
-    let mut glyph_cache=GlyphCache::new_alphabet(face.face(),alphabet,Scale::new(0.1,0.1),window.display());
+    let glyph_cache=GlyphCache::new_alphabet(face.face(),alphabet,Scale::new(0.1,0.1),window.display());
     let font=CachedFont::raw(face,glyph_cache);
     window.graphics2d().add_font(font);
 
-    let mut image_base=ImageBase::new(White,unsafe{[
+    let image_base=ImageBase::new(White,unsafe{[
         0f32,
         0f32,
         window_width,
         window_height
     ]});
 
-    let mut wallpaper_texture=Texture::from_path(loading_screen_wallpaper_path,window.display()).unwrap();
+    let wallpaper_texture=Texture::from_path(loading_screen_wallpaper_path,window.display()).unwrap();
     window.graphics2d().add_texture(wallpaper_texture);
 
     // Загрузка обоев
@@ -168,7 +177,7 @@ fn main(){
     // Проигрывание мелодии
     audio_wrapper.play_track(audio_menu_name);
 
-    let mut textures:Vec<RgbaImage>={
+    let textures:Vec<RgbaImage>={
         let mut loading_screen=LoadingScreen::new(&mut window);
         // Запуск загрузочного экрана
         window.run_page(&mut loading_screen)
@@ -197,7 +206,7 @@ fn load_window_icon()->Icon{
 }
 
 pub fn load_image<P:AsRef<std::path::Path>>(path:P)->RgbaImage{
-    let mut image=cat_engine::image::open(path).unwrap();
+    let image=cat_engine::image::open(path).unwrap();
 
     if let cat_engine::image::DynamicImage::ImageRgba8(image)=image{
         image
@@ -223,9 +232,9 @@ pub fn load_image_scaled<P:AsRef<std::path::Path>>(path:P,width:u32,height:u32)-
 pub fn load_image_scaled_height<P:AsRef<std::path::Path>>(path:P,height:u32)->RgbaImage{
     let mut image=cat_engine::image::open(path).unwrap();
 
-    let mut image_dimensions=image.dimensions();
+    let image_dimensions=image.dimensions();
 
-    let scale=image_dimensions.1 as f32/height as f32;
+    let scale=height as f32/image_dimensions.1 as f32;
     let width=(image_dimensions.0 as f32 * scale).ceil() as u32;
 
     image=image.resize_exact(width,height,cat_engine::image::imageops::FilterType::Gaussian);

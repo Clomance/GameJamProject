@@ -1,4 +1,4 @@
-use crate::{loading_screen_ghost_texture, wallpaper_index, load_image, load_image_scaled, main_menu_wallpaper_path, character_texture_path, load_image_scaled_height, map_background_path};
+use crate::{loading_screen_ghost_texture, wallpaper_index, load_image_scaled, main_menu_wallpaper_path, character_texture_path, load_image_scaled_height, map_background_path, character_height};
 
 use cat_engine::{PagedWindow, Window, WindowPage, MouseScrollDelta, KeyboardButton, MouseButton, ModifiersState, graphics::{
     ColourFilter,
@@ -14,6 +14,8 @@ use std::{
     },
 };
 use cat_engine::image::RgbaImage;
+use std::path::PathBuf;
+use lib::ImageObject;
 
 const ghost_texture_index:usize=1;
 // Текстурные объекты
@@ -31,15 +33,22 @@ pub struct LoadingScreen{
 
 impl LoadingScreen{
     pub fn new(window:&mut PagedWindow)->LoadingScreen{
-        let mut image_size=unsafe{[window_width as u32,window_height as u32]};
-
         // TODO добавить спрайты
-        let image_base=ImageBase::new([1f32;4],unsafe{[
-            window_center[0]-100f32,
-            window_center[1]-100f32,
-            200f32,
-            200f32
-        ]});
+        let image_base=ImageObject::new(unsafe{[
+                window_center[0]-100f32,
+                window_center[1]-100f32,
+                200f32,
+                200f32
+            ]},
+            [
+                0f32,
+                0f32,
+                0.5f32,
+                0.5f32
+            ],
+
+            [1f32;4]
+        );
 
         let ghost_texture=Texture::from_path(loading_screen_ghost_texture,window.display()).unwrap();
 
@@ -54,10 +63,13 @@ impl LoadingScreen{
         let thread=spawn(move|| {
             let mut textures:Vec<RgbaImage>=Vec::with_capacity(10);
 
+            let image_size=unsafe{[window_width as u32,window_height as u32]};
+
             textures.push(load_image_scaled(main_menu_wallpaper_path,image_size[0],image_size[1]));
-            textures.push(load_image(character_texture_path));
 
             textures.push(load_image_scaled_height(map_background_path,image_size[1]));
+
+            textures.push(load_image_scaled_height(character_texture_path,character_height));
 
             unsafe{
                 loading=false;
@@ -79,7 +91,7 @@ impl WindowPage<'static> for LoadingScreen{
     type Window = PagedWindow;
     type Output = Vec<RgbaImage>;
 
-    fn on_window_close_requested(&mut self, window: &mut Self::Window) {
+    fn on_window_close_requested(&mut self, _window: &mut Self::Window) {
 
     }
 
@@ -88,7 +100,7 @@ impl WindowPage<'static> for LoadingScreen{
             if let Some(thread) = self.thread.take() {
                 self.loaded_images=Some(thread.join().expect("Ошибка начальной загрузки"));
             }
-            window.stop_events();
+            window.stop_events().unwrap();
         }
 
         if self.frames==10{
@@ -105,7 +117,7 @@ impl WindowPage<'static> for LoadingScreen{
         window.draw(|parameters,graphics|{
             graphics.draw_textured_object(wallpaper_index,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
             graphics.draw_textured_object(self.ghost,ColourFilter::new_mul([1f32;4]),parameters).unwrap();
-        });
+        }).unwrap();
     }
 
     fn on_mouse_pressed(&mut self, _window: &mut Self::Window, _button: MouseButton) {
@@ -176,7 +188,7 @@ impl WindowPage<'static> for LoadingScreen{
     }
 
     fn on_event_loop_closed(&mut self, window: &mut Self::Window) -> Self::Output {
-        // Удаление всех текстурных объектов
+        // Удаление всех текстурных объектов с этой страницы
         window.graphics2d().delete_last_textured_object();
         window.graphics2d().delete_last_textured_object();
 

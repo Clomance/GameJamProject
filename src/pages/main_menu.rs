@@ -1,4 +1,4 @@
-use crate::{game_name, Drawable, DrawableObject, main_menu_wallpaper_path, wallpaper_index};
+use crate::{game_name, Drawable, DrawableObject, main_menu_wallpaper_path, wallpaper_index, main_menu_image_index};
 
 
 use lib::{
@@ -20,10 +20,11 @@ use cat_engine::{window_height, window_width, mouse_cursor, WindowEvent, Keyboar
     ObjectType
 }, WindowPage, MouseScrollDelta, ModifiersState, window_center};
 
-use lib::colours::Bleak_orange;
 use std::path::PathBuf;
 use std::iter::Filter;
 use cat_engine::graphics::ColourFilter;
+use cat_engine::image::RgbaImage;
+use lib::colours::{White, Black};
 
 // Индекс картинки для главного меню
 // Пока что так
@@ -35,9 +36,9 @@ pub struct MainMenu<'a>{
 
 
 impl<'a> MainMenu<'a>{
-    pub fn new(object_map:&'a mut ObjectMap,window:&mut PagedWindow)->MainMenu<'a>{
+    pub fn new(textures:&Vec<RgbaImage>,object_map:&'a mut ObjectMap,window:&mut PagedWindow)->MainMenu<'a>{
         // Устновка обоев для главного меню
-        //window.graphics2d().get_textured_object_texture(main_menu_wallpaper).update(/);
+        window.graphics2d().get_textured_object_texture(wallpaper_index).update(&textures[main_menu_image_index]);
 
         let main_menu = MenuButtons::new(window);
         object_map.add_complex_object(0,main_menu);
@@ -52,10 +53,10 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
     type Window = PagedWindow;
     type Output = ();
 
-    fn on_window_close_requested(&mut self, window: &mut Self::Window) {
+    fn on_window_close_requested(&mut self, _window: &mut Self::Window) {
     }
 
-    fn on_update_requested(&mut self, window: &mut Self::Window) {
+    fn on_update_requested(&mut self, _window: &mut Self::Window) {
     }
 
     fn on_redraw_requested(&mut self, window: &mut Self::Window) {
@@ -79,7 +80,7 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
                         // quit
                         1=>{
                             println!("pressed");
-                            window.stop_events();
+                            window.stop_events().unwrap();
                         }
                         _=>{
 
@@ -91,7 +92,7 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
         }
     }
 
-    fn on_mouse_released(&mut self, window: &mut Self::Window, button: MouseButton) {
+    fn on_mouse_released(&mut self, _window: &mut Self::Window, button: MouseButton) {
         let cursor_position=unsafe{mouse_cursor.position()};
         match button{
             MouseButton::Left=>{
@@ -189,10 +190,10 @@ impl MenuButtons{
         // Menu buttons
         let confirmation_button_size = [400f32, 100f32];
         let button_game_placement = unsafe{[window_center[0]-200f32, window_center[1], confirmation_button_size[0], confirmation_button_size[1]]};
-        let button_game_settings = ButtonSettings::new("НАЧАТЬ ИГРУ", button_game_placement).background_colour([0f32;4]);
+        let button_game_settings = ButtonSettings::new("НАЧАТЬ ИГРУ", button_game_placement).background_colour([0f32;4]).text_colour(White);
         let button_game = Button::new(button_game_settings, window.graphics2d());
         let button_quit_placement = unsafe{[window_center[0]-200f32, window_center[1] + 120f32, confirmation_button_size[0], confirmation_button_size[1]]};
-        let button_quit_settings = ButtonSettings::new("ВЫЙТИ", button_quit_placement).background_colour([0f32;4]);;
+        let button_quit_settings = ButtonSettings::new("ВЫЙТИ", button_quit_placement).background_colour([0f32;4]).text_colour(White);
         let button_quit = Button::new(button_quit_settings, window.graphics2d());
 
         Self{

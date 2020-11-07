@@ -1,29 +1,11 @@
-use crate::{
-    audio_menu_name,
-    audio_menu_path,
-    loading_screen_ghost_texture,
-    wallpaper_index,
-};
+use crate::{audio_menu_name, audio_menu_path, loading_screen_ghost_texture, wallpaper_index, load_image, load_image_scaled, main_menu_wallpaper_path, character_texture_path, load_image_scaled_height, map_background_path};
 
-use cat_engine::{
-    PagedWindow,
-    Window,
-    WindowPage,
-    MouseScrollDelta,
-    KeyboardButton,
-    MouseButton,
-    ModifiersState,
-
-    graphics::{
-        ColourFilter,
-    },
-
-    texture::{
-        Texture,
-        ImageBase,
-    },
-    window_center,
-};
+use cat_engine::{PagedWindow, Window, WindowPage, MouseScrollDelta, KeyboardButton, MouseButton, ModifiersState, graphics::{
+    ColourFilter,
+}, texture::{
+    Texture,
+    ImageBase,
+}, window_center, window_width, window_height};
 
 use std::{
     thread::{
@@ -32,7 +14,10 @@ use std::{
     },
     path::PathBuf,
 };
+use cat_engine::image::RgbaImage;
 
+const ghost_texture_index:usize=1;
+// Текстурные объекты
 const ghost_1:usize=1;
 const ghost_2:usize=ghost_1+1;
 
@@ -41,11 +26,14 @@ static mut loading:bool=true;
 pub struct LoadingScreen{
     frames:usize,
     ghost:usize,
-    thread:Option<JoinHandle<()>>,
+    thread:Option<JoinHandle<Vec<RgbaImage>>>,
+    loaded_images:Option<Vec<RgbaImage>>,
 }
 
 impl LoadingScreen{
     pub fn new(window:&mut PagedWindow)->LoadingScreen{
+        let mut image_size=unsafe{[window_width as u32,window_height as u32]};
+
         // TODO добавить спрайты
         let image_base=ImageBase::new([1f32;4],unsafe{[
             window_center[0]-100f32,
@@ -65,22 +53,32 @@ impl LoadingScreen{
 
         // Создание потока загрузки ресурсов
         let thread=spawn(move|| {
+            let mut textures:Vec<RgbaImage>=Vec::with_capacity(10);
+
+            textures.push(load_image_scaled(main_menu_wallpaper_path,image_size[0],image_size[1]));
+            textures.push(load_image(character_texture_path));
+
+            textures.push(load_image_scaled_height(map_background_path,image_size[1]));
+
             unsafe{
                 loading=false;
             }
+
+            textures
         });
 
         Self{
             frames:0usize,
             ghost:ghost_1,
             thread:Some(thread),
+            loaded_images:None,
         }
     }
 }
 
 impl WindowPage<'static> for LoadingScreen{
     type Window = PagedWindow;
-    type Output = ();
+    type Output = Vec<RgbaImage>;
 
     fn on_window_close_requested(&mut self, window: &mut Self::Window) {
 
@@ -89,7 +87,7 @@ impl WindowPage<'static> for LoadingScreen{
     fn on_update_requested(&mut self, window: &mut Self::Window) {
         if unsafe{!loading} {
             if let Some(thread) = self.thread.take() {
-                thread.join().expect("Ошибка начальной загрузки");
+                self.loaded_images=Some(thread.join().expect("Ошибка начальной загрузки"));
             }
             window.stop_events();
         }
@@ -111,55 +109,55 @@ impl WindowPage<'static> for LoadingScreen{
         });
     }
 
-    fn on_mouse_pressed(&mut self, window: &mut Self::Window, button: MouseButton) {
+    fn on_mouse_pressed(&mut self, _window: &mut Self::Window, _button: MouseButton) {
 
     }
 
-    fn on_mouse_released(&mut self, window: &mut Self::Window, button: MouseButton) {
+    fn on_mouse_released(&mut self, _window: &mut Self::Window, _button: MouseButton) {
 
     }
 
-    fn on_mouse_scrolled(&mut self, window: &mut Self::Window, scroll: MouseScrollDelta) {
+    fn on_mouse_scrolled(&mut self, _window: &mut Self::Window, _scroll: MouseScrollDelta) {
 
     }
 
-    fn on_mouse_moved(&mut self, window: &mut Self::Window, position: [f32; 2]) {
+    fn on_mouse_moved(&mut self, _window: &mut Self::Window, _position: [f32; 2]) {
 
     }
 
-    fn on_keyboard_pressed(&mut self, window: &mut Self::Window, button: KeyboardButton) {
+    fn on_keyboard_pressed(&mut self, _window: &mut Self::Window, _button: KeyboardButton) {
 
     }
 
-    fn on_keyboard_released(&mut self, window: &mut Self::Window, button: KeyboardButton) {
+    fn on_keyboard_released(&mut self, _window: &mut Self::Window, _button: KeyboardButton) {
 
     }
 
-    fn on_character_recieved(&mut self, window: &mut Self::Window, character: char) {
+    fn on_character_recieved(&mut self, _window: &mut Self::Window, _character: char) {
 
     }
 
-    fn on_window_resized(&mut self, window: &mut Self::Window, new_size: [u32; 2]) {
+    fn on_window_resized(&mut self, _window: &mut Self::Window, _new_size: [u32; 2]) {
 
     }
 
-    fn on_window_moved(&mut self, window: &mut Self::Window, position: [i32; 2]) {
+    fn on_window_moved(&mut self, _window: &mut Self::Window, _position: [i32; 2]) {
 
     }
 
-    fn on_window_focused(&mut self, window: &mut Self::Window, focused: bool) {
+    fn on_window_focused(&mut self, _window: &mut Self::Window, _focused: bool) {
 
     }
 
-    fn on_suspended(&mut self, window: &mut Self::Window) {
+    fn on_suspended(&mut self, _window: &mut Self::Window) {
 
     }
 
-    fn on_resumed(&mut self, window: &mut Self::Window) {
+    fn on_resumed(&mut self, _window: &mut Self::Window) {
 
     }
 
-    fn on_modifiers_changed(&mut self, window: &mut Self::Window, modifiers: ModifiersState) {
+    fn on_modifiers_changed(&mut self, _window: &mut Self::Window, _modifiers: ModifiersState) {
 
     }
 
@@ -179,8 +177,13 @@ impl WindowPage<'static> for LoadingScreen{
     }
 
     fn on_event_loop_closed(&mut self, window: &mut Self::Window) -> Self::Output {
-        // Удаление всех текстурных объектов (но не их текстур)
+        // Удаление всех текстурных объектов
         window.graphics2d().delete_last_textured_object();
         window.graphics2d().delete_last_textured_object();
+
+        // Удаление текстуры объектов
+        window.graphics2d().remove_texture(ghost_texture_index);
+
+        self.loaded_images.take().unwrap()
     }
 }

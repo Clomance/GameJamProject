@@ -7,3 +7,4 @@ pub struct Character{
     energy:u32,
     weapons:Vec<Weapon>,
 }
+

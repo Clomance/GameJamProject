@@ -17,6 +17,7 @@ pub struct ImageObject{
 }
 
 impl ImageObject{
+    // rect - [x,y,width,height]
     pub fn new(rect:[f32;4],rect_image:[f32;4],colour_filter:[f32;4])->ImageObject{
         Self{
             x1:rect[0],

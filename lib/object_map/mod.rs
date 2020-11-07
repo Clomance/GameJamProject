@@ -97,6 +97,10 @@ impl ObjectMap{
         self.drawable_object_types[layer].enabled=enabled
     }
 
+    pub fn clear_layer(&mut self,index:usize){
+        self.drawable_object_types[index].clear();
+    }
+
     /// Отчищает все слоит от объектов.
     pub fn clear_layers(&mut self){
         for c in 0..self.drawable_object_types.len(){

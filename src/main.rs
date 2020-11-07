@@ -12,11 +12,11 @@ use character::*;
 mod pages;
 use pages::*;
 
-mod map;
+//mod map;
 mod phys_engine;
 pub use phys_engine::*;
 
-use map::Map;
+//use map::Map;
 
 use lib ::{
     *,
@@ -54,6 +54,7 @@ use cat_engine::{
 use cat_engine::glium::backend::glutin::glutin::window::Fullscreen;
 use cat_engine::glium::glutin::window::Icon;
 use cat_engine::image::GenericImageView;
+use cat_engine::graphics::{ObjectType, DrawType};
 
 const game_name:&'static str="GhostBuster";
 
@@ -100,9 +101,21 @@ const alphabet:&'static str="АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛ�
 
 pub static loading:bool=true;
 
+#[derive(Clone,PartialEq)]
+pub enum GameState{
+    Loaded(Vec<RgbaImage>),
+    MainMenu,
+    GamePlay,
+    Pause,
+    Exit,
+}
+
 fn main(){
     let face=FontOwner::load(pixel_font_path).unwrap();
+
+    // Карта объектов
     let mut object_map=ObjectMap::new();
+    object_map.add_new_layer();
     object_map.add_new_layer();
 
     // Настройки игры
@@ -151,8 +164,6 @@ fn main(){
 
         settings.general.initial_colour=Some([1f32;4]);
 
-
-
         settings.vsync=true;
     }).unwrap();
 
@@ -161,39 +172,52 @@ fn main(){
     let font=CachedFont::raw(face,glyph_cache);
     window.graphics2d().add_font(font);
 
-    let image_base=ImageBase::new(White,unsafe{[
-        0f32,
-        0f32,
-        window_width,
-        window_height
-    ]});
+    {// Загрузка обоев
+        let image_base = ImageBase::new(White, unsafe {
+            [
+                0f32,
+                0f32,
+                window_width,
+                window_height
+            ]
+        });
 
-    let wallpaper_texture=Texture::from_path(loading_screen_wallpaper_path,window.display()).unwrap();
-    window.graphics2d().add_texture(wallpaper_texture);
-
-    // Загрузка обоев
-    window.graphics2d().add_textured_object(&image_base,0).unwrap();
-
+        let wallpaper_texture = Texture::from_path(loading_screen_wallpaper_path, window.display()).unwrap();
+        window.graphics2d().add_texture(wallpaper_texture);
+        window.graphics2d().add_textured_object(&image_base, 0).unwrap();
+    }
     // Проигрывание мелодии
     audio_wrapper.play_track(audio_menu_name);
 
     let textures:Vec<RgbaImage>={
         let mut loading_screen=LoadingScreen::new(&mut window);
         // Запуск загрузочного экрана
-        window.run_page(&mut loading_screen)
+        if let GameState::Loaded(textures)=window.run_page(&mut loading_screen){
+            textures
+        }
+        else{
+            return
+        }
     };
 
-    {
-        let mut main_menu=MainMenu::new(&textures,&mut object_map,&mut window);
-        // Запуск главного меню
-        window.run_page(&mut main_menu);
+    'game:loop{
+        {
+            let mut main_menu=MainMenu::new(&textures,&mut object_map,&mut window);
+            // Запуск главного меню
+            if let GameState::Exit=window.run_page(&mut main_menu){
+                break 'game
+            }
+        }
+
+        {
+            let mut game_play=GamePlay::new(&textures,&mut window);
+            // Запуск геймплея
+            if let GameState::Exit=window.run_page(&mut game_play){
+                break 'game
+            }
+        }
     }
 
-    {
-        let mut game_play=GamePlay::new(&textures,&mut window);
-        // Запуск геймплея
-        window.run_page(&mut game_play);
-    }
 }
 
 /// Загрузка иконки окна
@@ -229,19 +253,18 @@ pub fn load_image_scaled<P:AsRef<std::path::Path>>(path:P,width:u32,height:u32)-
     }
 }
 
-pub fn load_image_scaled_height<P:AsRef<std::path::Path>>(path:P,height:u32)->RgbaImage{
-    let mut image=cat_engine::image::open(path).unwrap();
+pub fn load_image_scaled_height<P:AsRef<std::path::Path>>(path:P,height:u32)->RgbaImage {
+    let mut image = cat_engine::image::open(path).unwrap();
 
-    let image_dimensions=image.dimensions();
+    let image_dimensions = image.dimensions();
 
-    let scale=height as f32/image_dimensions.1 as f32;
-    let width=(image_dimensions.0 as f32 * scale).ceil() as u32;
+    let scale = height as f32 / image_dimensions.1 as f32;
+    let width = (image_dimensions.0 as f32 * scale).ceil() as u32;
 
-    image=image.resize_exact(width,height,cat_engine::image::imageops::FilterType::Gaussian);
-    if let cat_engine::image::DynamicImage::ImageRgba8(image)=image{
+    image = image.resize_exact(width, height, cat_engine::image::imageops::FilterType::Gaussian);
+    if let cat_engine::image::DynamicImage::ImageRgba8(image) = image {
         image
-    }
-    else{
+    } else {
         image.into_rgba()
     }
 }

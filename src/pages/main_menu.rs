@@ -1,11 +1,7 @@
-use crate::{game_name, Drawable, DrawableObject, main_menu_wallpaper_path, wallpaper_index, main_menu_image_index};
+use crate::{DrawableObject, wallpaper_index, main_menu_image_index, GameState};
 
 
 use lib::{
-    Menu,
-    MenuSettings,
-    TextView,
-    TextViewSettings,
     ButtonSettings,
     Button,
     ComplexClickable,
@@ -14,19 +10,16 @@ use lib::{
     ObjectMap
 };
 
-use cat_engine::{mouse_cursor, KeyboardButton, MouseButton, Window, audio::Audio, PagedWindow, WindowPage, MouseScrollDelta, ModifiersState, window_center};
+use cat_engine::{mouse_cursor, KeyboardButton, MouseButton, Window, PagedWindow, WindowPage, MouseScrollDelta, ModifiersState, window_center};
 
 use cat_engine::graphics::ColourFilter;
 use cat_engine::image::RgbaImage;
 use lib::colours::{White};
 use std::path::PathBuf;
 
-// Индекс картинки для главного меню
-// Пока что так
-const main_menu_image:usize=0;
-
 pub struct MainMenu<'a>{
-    object_map:&'a mut ObjectMap
+    object_map:&'a mut ObjectMap,
+    state:GameState,
 }
 
 
@@ -40,18 +33,20 @@ impl<'a> MainMenu<'a>{
 
         Self{
             object_map,
+            state:GameState::Exit
         }
     }
 }
 
 impl<'a> WindowPage<'static> for MainMenu<'a>{
     type Window = PagedWindow;
-    type Output = ();
+    type Output = GameState;
 
     fn on_window_close_requested(&mut self, _window: &mut Self::Window) {
     }
 
     fn on_update_requested(&mut self, _window: &mut Self::Window) {
+
     }
 
     fn on_redraw_requested(&mut self, window: &mut Self::Window) {
@@ -70,12 +65,11 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
                     match button{
                         // New game
                         0=>{
-                            println!("pressed")
+
                         }
                         // quit
                         1=>{
-                            println!("pressed");
-                            window.stop_events().unwrap();
+
                         }
                         _=>{
 
@@ -87,21 +81,23 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
         }
     }
 
-    fn on_mouse_released(&mut self, _window: &mut Self::Window, button: MouseButton) {
+    fn on_mouse_released(&mut self, window: &mut Self::Window, button: MouseButton) {
         let cursor_position=unsafe{mouse_cursor.position()};
         match button{
             MouseButton::Left=>{
-                if let Some((mut button,clicked))=self.object_map.released(cursor_position){
+                if let Some((button,clicked))=self.object_map.released(cursor_position){
 
                     match button{
                         0=>{
                             if clicked{
-                                println!("continue")
+                                self.state=GameState::GamePlay;
+                                window.stop_events().unwrap();
                             }
                         }
                         1=> {
                             if clicked {
-                                println!("continue")
+                                self.state=GameState::Exit;
+                                window.stop_events().unwrap();
                             }
                         }
 
@@ -171,6 +167,8 @@ impl<'a> WindowPage<'static> for MainMenu<'a>{
         window.graphics2d().clear_simple_object_array();
         window.graphics2d().clear_text_object_array();
         self.object_map.clear();
+
+        self.state.clone()
     }
 }
 

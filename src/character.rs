@@ -1,10 +1,24 @@
 use super::{
-    Weapon,
+    Movement,
 };
 
 pub struct Character{
-    health:u32,
-    energy:u32,
-    weapons:Vec<Weapon>,
+    pub position:[f32;2],
+
+    pub velocity:f32,
+    pub movement:Movement,
 }
 
+impl Character{
+    pub fn new(velocity:f32)->Character{
+        Self{
+            position:[0f32;2],
+            velocity,
+            movement:Movement::None
+        }
+    }
+
+    pub fn moving(&mut self)->bool{
+        self.movement.moving(&mut self.position,self.velocity)
+    }
+}

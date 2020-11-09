@@ -52,12 +52,12 @@ impl Camera{
             }
             Movement::DownRight=>{
                 let half_velocity=self.velocity/2f32;
-                self.position[1]-=half_velocity;
+                self.position[1]+=half_velocity;
                 self.position[0]+=half_velocity
             }
             Movement::DownLeft=>{
                 let half_velocity=self.velocity/2f32;
-                self.position[1]-=half_velocity;
+                self.position[1]+=half_velocity;
                 self.position[0]-=half_velocity
             }
         }

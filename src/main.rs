@@ -3,8 +3,8 @@
 mod settings;
 use settings::GameSettings;
 
-mod weapon;
-use weapon::*;
+mod camera;
+use camera::*;
 
 mod character;
 use character::*;
